@@ -41,6 +41,7 @@ away <- rawInfo$resultSets[[6]]$rowSet[[2]][[7]]
 homePts <- rawInfo$resultSets[[6]]$rowSet[[1]][[23]]
 awayPts <- rawInfo$resultSets[[6]]$rowSet[[2]][[23]]
 
+png("20160305_knicks.png", width = 612, height = 575)
 ggplot(game, aes(x = LOC_X * -1, y = LOC_Y * -1)) + 
   inset_raster(readPNG("nba-halfcourt.png"), xmin = -250, xmax = 250, ymin = -420, ymax = 50) +
   geom_point(aes(color = EVENT_TYPE), size = 6, alpha = 0.5) +
@@ -58,9 +59,9 @@ ggplot(game, aes(x = LOC_X * -1, y = LOC_Y * -1)) +
         legend.text = element_text(size = 14),
         legend.title = element_blank(),
         panel.margin = unit(0, "lines"), 
-        plot.margin = unit(c(0, 0, 0, 0), "lines"),
+        plot.margin = unit(c(2, 0, 0, 0), "lines"),
         plot.title = element_text(size = 18, margin = margin(t = -20))
         )  +
   ggtitle(paste(date, away, awayPts, "@", home, homePts, "\n", team, "shots")) + 
   annotate("text", x = 200, y = -405, label = paste(overall, "Overall"), size = 6, fontface = 2)
-
+dev.off()
