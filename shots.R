@@ -2,8 +2,9 @@ library(rjson)
 library(dplyr)
 library(png)
 library(ggplot2)
+library(ggmap)
 
-gameId <- "0923"
+gameId <- "0987"
 season <- 2015
 playerId <- "0"
 teamId <- "0"
@@ -27,6 +28,7 @@ game$LOC_Y <- as.numeric(levels(game$LOC_Y))[game$LOC_Y]
 
 accuracy <- as.data.frame.matrix(t(table(game$EVENT_TYPE, game$SHOT_ZONE_BASIC)))
 accuracy$pct <- round(accuracy$`Made Shot` / rowSums(accuracy) * 100, 2)
+accuracy <- accuracy[complete.cases(accuracy), ]
 loc <- game %>% group_by(SHOT_ZONE_BASIC) %>% summarize(x = mean(LOC_X), y = mean(LOC_Y))
 accuracy <- cbind(accuracy, loc[, 2:3])
 overall <- round(sum(accuracy$`Made Shot`) / 
