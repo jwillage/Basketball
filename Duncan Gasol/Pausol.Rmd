@@ -1,0 +1,233 @@
+---
+title: "Duncan / Gasol"
+author: "Joe Willage"
+date: "August 4, 2016"
+output: html_document
+---
+
+```{r echo = FALSE}
+library(knitr)
+opts_chunk$set(echo = FALSE, cache = TRUE, message = FALSE, cache.path = "cache/", 
+               fig.path = "figure/", fig.width = 9, fig.height = 9)
+```
+
+```{r includes}
+library(rjson)
+library(dplyr)
+library(png)
+library(ggplot2)
+library(ggmap)
+```
+
+```{r data pull}
+gameId <- ""
+season <- 2015
+playerId <- "0"
+teamId <- "0"
+context <- "FGA"
+playerId <- 1495
+
+url <- paste0("http://stats.nba.com/stats/shotchartdetail?Period=0&VsConference=&LeagueID=00&", 
+              "LastNGames=0&TeamID=", teamId, "&Position=&Location=&Outcome=&",
+              "ContextMeasure=", context, "&DateFrom=&StartPeriod=&DateTo=&OpponentTeamID=0&",
+              "ContextFilter=&RangeType=&Season=", paste0(season, "-", substr(season + 1, 3, 4)),
+              "&AheadBehind=&PlayerID=", playerId,  
+              "&EndRange=&VsDivision=&PointDiff=&RookieYear=&GameSegment=&Month=0&ClutchTime=&",
+              "StartRange=&EndPeriod=&SeasonType=Regular+Season&SeasonSegment=&",
+             # "GameID=", paste0("00", substr(season, 1, 1), substr(season, 3, 4), "0", gameId))
+             "GameID=")
+raw <- fromJSON(file = url)
+game <-  data.frame(t(sapply(raw$resultSets[[1]]$rowSet, function(x) unlist(x))))
+names(game) <- raw$resultSets[[1]]$headers
+game$LOC_X <- as.numeric(levels(game$LOC_X))[game$LOC_X]
+game$LOC_Y <- as.numeric(levels(game$LOC_Y))[game$LOC_Y]
+
+accuracy <- as.data.frame.matrix(t(table(game$EVENT_TYPE, game$SHOT_ZONE_BASIC)))
+accuracy$pct <- round(accuracy$`Made Shot` / rowSums(accuracy) * 100, 2)
+accuracy <- accuracy[complete.cases(accuracy), ]
+loc <- game %>% group_by(SHOT_ZONE_BASIC) %>% summarize(x = mean(LOC_X), y = mean(LOC_Y))
+accuracy <- cbind(accuracy, loc[, 2:3])
+overall <- round(sum(accuracy$`Made Shot`) / 
+                   (sum(accuracy$`Made Shot`) + sum(accuracy$`Missed Shot`)) * 100, 2)
+```
+
+When I pulled the data, I thought I had made a mistake. I was expecting every shot Tim Duncan took in the 2015-16 season, but I only had 441 results. Well, that number turned out to be correct. Tim played 61 regular season games, and averaged 7.2 FGA/game, for a total of 463 field goal attempts. (Side note: I omitted Duncan's player ID the first time I ran this and actually pulled back all FGA taken in the season: there were 207,895. James Harden had the most, with 1,617). Here's Duncan's shot chart over the entire regular season.  
+
+```{r duncan shot chart hex}
+#TODO consider cutting off near the top of the key
+
+ggplot(game, aes(x = LOC_X * -1, y = LOC_Y * -1, z = as.numeric(SHOT_MADE_FLAG) - 1)) + 
+  inset_raster(readPNG("nba-halfcourt.png"), xmin = -250, xmax = 250, ymin = -420, ymax = 50) +
+  lims(x = c(-250, 250), y = c(-420, 50)) +
+  coord_fixed() +
+  theme(line = element_blank(), 
+        rect = element_blank(), 
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks.length = unit(0, "cm"), 
+        legend.position = c(0.1, 0.13),
+        legend.text = element_text(size = 14),
+        legend.title = element_blank(),
+        panel.margin = unit(0, "lines"), 
+        plot.margin = unit(c(2, 0, 0, 0), "lines"),
+        plot.title = element_text(size = 18, margin = margin(t = -20))
+  )  +
+  ggtitle("Tim Duncan\n2015 - 2016 FGA") +
+  annotate("text", x = 200, y = -405, label = paste(overall, "Overall"), size = 6, fontface = 2) +
+  stat_summary_hex() +
+  scale_fill_gradient(low = "darkblue", high = "lightblue")
+
+```
+
+
+It's no surprise that Timmy's strongest areas are in the paint, especially within the restricted area, and especially to the left of the rim. NBA categorizes shots as the following: Less Than 8 ft; 8-16 ft; 16-24 ft; 24+ ft; Back Court. `r round(nrow(game[game$SHOT_ZONE_BASIC == "Restricted Area", ])/nrow(game) * 100, 0)`% of Duncan's shots last season came from the restricted area, which he converted at a `r round(nrow(game[game$SHOT_ZONE_BASIC == "Restricted Area" & game$SHOT_MADE_FLAG == 1, ]) / nrow(game[game$SHOT_ZONE_BASIC == "Restricted Area", ]) * 100, 0)`% clip. From the rest of the painted area, he cooled down a bit, shooting `r round(nrow(game[game$SHOT_ZONE_BASIC == "In The Paint (Non-RA)", ])/nrow(game) * 100, 0)`% of his shots from there, converting at a `r round(nrow(game[game$SHOT_ZONE_BASIC == "In The Paint (Non-RA)" & game$SHOT_MADE_FLAG == 1, ]) / nrow(game[game$SHOT_ZONE_BASIC == "In The Paint (Non-RA)", ]) * 100, 0)`% rate (close to his average for the regular season). Unsurprisingly, Tim's numbers drop as the shot attempts move further out; from 8-16 ft he converted `r round(nrow(game[game$SHOT_ZONE_RANGE == "8-16 ft." & game$SHOT_MADE_FLAG == '1',])/ nrow(game[game$SHOT_ZONE_RANGE == "8-16 ft." ,]) *100, 0)`% and from 16-24 ft he converted `r round(nrow(game[game$SHOT_ZONE_RANGE == "16-24 ft." & game$SHOT_MADE_FLAG == '1',])/ nrow(game[game$SHOT_ZONE_RANGE == "16-24 ft." ,])*100, 0)`%. There were 2 failed attempts from beyond the arc, but it's Tim Duncan, and he made it [when it counted](https://www.youtube.com/watch?v=trdsKp94Io0). 
+
+His 48.75% overall field goal percentage for the season was pretty good compared to the [league average of 45.2%](http://www.basketball-reference.com/leagues/NBA_stats.html#stats::none). 
+
+Adding in his 1.5 made free throws per game, Duncan ended up contributing 8.6 PPG in the 2015-16 season, by far his lowest. While it's true that he also played the fewest minutes of his career (25.2 MPG), his individiual points per minute suffered a career low, finishing at 0.34 (his career high was 0.63 iPPM in 2001-02). (Wikipedia). While seeing Timmy retire might be the low point of my life, it looks like it was probably for the best. He went out fighting, and I love that.  
+
+That brings us to the coming season. While the Spurs didn't accomplish their number one goal of signing Kevin Durant, they still did very well in securing free agent Pau Gasol. Gasol's numbers during his two seasons with Chicago makes it look like he'll be a great fit on paper for the Spurs in Duncan's absence. 
+
+```{r gasol data pull}
+playerId <- 2200
+
+url <- paste0("http://stats.nba.com/stats/shotchartdetail?Period=0&VsConference=&LeagueID=00&", 
+              "LastNGames=0&TeamID=", teamId, "&Position=&Location=&Outcome=&",
+              "ContextMeasure=", context, "&DateFrom=&StartPeriod=&DateTo=&OpponentTeamID=0&",
+              "ContextFilter=&RangeType=&Season=", paste0(season, "-", substr(season + 1, 3, 4)),
+              "&AheadBehind=&PlayerID=", playerId,  
+              "&EndRange=&VsDivision=&PointDiff=&RookieYear=&GameSegment=&Month=0&ClutchTime=&",
+              "StartRange=&EndPeriod=&SeasonType=Regular+Season&SeasonSegment=&",
+             # "GameID=", paste0("00", substr(season, 1, 1), substr(season, 3, 4), "0", gameId))
+             "GameID=")
+raw <- fromJSON(file = url)
+gasol <-  data.frame(t(sapply(raw$resultSets[[1]]$rowSet, function(x) unlist(x))))
+names(gasol) <- raw$resultSets[[1]]$headers
+gasol$LOC_X <- as.numeric(levels(gasol$LOC_X))[gasol$LOC_X]
+gasol$LOC_Y <- as.numeric(levels(gasol$LOC_Y))[gasol$LOC_Y]
+
+accuracy <- as.data.frame.matrix(t(table(gasol$EVENT_TYPE, gasol$SHOT_ZONE_BASIC)))
+accuracy$pct <- round(accuracy$`Made Shot` / rowSums(accuracy) * 100, 2)
+accuracy <- accuracy[complete.cases(accuracy), ]
+loc <- gasol %>% group_by(SHOT_ZONE_BASIC) %>% summarize(x = mean(LOC_X), y = mean(LOC_Y))
+accuracy <- cbind(accuracy, loc[, 2:3])
+overall <- round(sum(accuracy$`Made Shot`) / 
+                   (sum(accuracy$`Made Shot`) + sum(accuracy$`Missed Shot`)) * 100, 2)
+```
+
+To start with, Gasol attempted `r nrow(gasol)` shots, more than twice as many as Duncan. Take that number with a grain of salt. It's tough to normalize, but consider that Duncan started alongside the likes of LaMarcus Aldridge, Tony Parker, Kawhi Leonard, and Danny Green. Gasol started alongside a rotating cast of Jimmy Butler, Derrick Rose, Taj Gibson, E'Twaun Moore, Mike Dunleavy, Nikola Mirotic, Tony Snell, and Bobby Portis. There was definitely more basketball to go around for the Bulls last season than for the Spurs (an interesting problem that Rose will have to face coming into New York this year). So it follows that when Gasol had the ball, he shot it more than Duncan.  
+
+When Gasol was on the floor last season, he scored 0.52 iPPM. That's higher, as expected, than Duncan. As far as efficiency, he had an overall season average of 46.9%, slightly less than Tim's 48.8%. Here is Gasol's 2015-16 shot chart.  
+
+```{r gasol shot chart hex}
+#TODO consider cutting off near the top of the key
+
+ggplot(gasol, aes(x = LOC_X * -1, y = LOC_Y * -1, z = as.numeric(SHOT_MADE_FLAG) - 1)) + 
+  inset_raster(readPNG("nba-halfcourt.png"), xmin = -250, xmax = 250, ymin = -420, ymax = 50) +
+  lims(x = c(-250, 250), y = c(-420, 50)) +
+  coord_fixed() +
+  theme(line = element_blank(), 
+        rect = element_blank(), 
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks.length = unit(0, "cm"), 
+        legend.position = c(0.1, 0.13),
+        legend.text = element_text(size = 14),
+        legend.title = element_blank(),
+        panel.margin = unit(0, "lines"), 
+        plot.margin = unit(c(2, 0, 0, 0), "lines"),
+        plot.title = element_text(size = 18, margin = margin(t = -20))
+  )  +
+  ggtitle("Pau Gasol\n2015 - 2016 FGA") +
+  annotate("text", x = 200, y = -405, label = paste(overall, "Overall"), size = 6, fontface = 2) +
+  stat_summary_hex() +
+  scale_fill_gradient(low = "darkblue", high = "lightblue")
+
+```
+
+
+What immediately stands out here is the spots outside the 3 point arc. Gasol attempted `r nrow(gasol[gasol$SHOT_TYPE == "3PT Field Goal",])` threes last season (`r round(nrow(gasol[gasol$SHOT_TYPE == "3PT Field Goal",])/length(unique(gasol$GAME_ID)), 2)`/gm), and converted `r round(nrow(gasol[gasol$SHOT_TYPE == "3PT Field Goal" & gasol$SHOT_MADE_FLAG == 1,]) /nrow(gasol[gasol$SHOT_TYPE == "3PT Field Goal",]) * 100, 0)`% of them. Factoring in his made threes, Gasol's eFG% is `r round((nrow(gasol[gasol$SHOT_TYPE == "3PT Field Goal" & gasol$SHOT_MADE_FLAG == 1,]) * .5 + nrow(gasol[gasol$SHOT_MADE_FLAG == 1,]))/nrow(gasol) * 100, 1)`, closer, but still below Tim's. 
+
+Looking at the chart, Gasol *appears* to be pretty good from the restricted area, but not as good as Duncan. He took `r round(nrow(gasol[gasol$SHOT_ZONE_BASIC == "Restricted Area", ])/nrow(gasol) * 100, 0)`% of his shots from there, and converted at a `r round(nrow(gasol[gasol$SHOT_ZONE_BASIC == "Restricted Area" & gasol$SHOT_MADE_FLAG == 1, ]) / nrow(gasol[gasol$SHOT_ZONE_BASIC == "Restricted Area", ]) * 100, 0)`% clip. That's actually lower than the league average for the season, which was 60% (complete data set). In the paint outside the RA, Gasol attempted `r round(nrow(gasol[gasol$SHOT_ZONE_BASIC == "In The Paint (Non-RA)", ])/nrow(gasol) * 100, 0)`% of his shots, making a dismal `r round(nrow(gasol[gasol$SHOT_ZONE_BASIC == "In The Paint (Non-RA)" & gasol$SHOT_MADE_FLAG == 1, ]) / nrow(gasol[gasol$SHOT_ZONE_BASIC == "In The Paint (Non-RA)", ]) * 100, 0)`% of them. Fortunately, he's a better further out. From 8-16 ft, Gasol converted `r round(nrow(gasol[gasol$SHOT_ZONE_RANGE == "8-16 ft." & gasol$SHOT_MADE_FLAG == '1',])/ nrow(gasol[gasol$SHOT_ZONE_RANGE == "8-16 ft." ,]) *100, 0)`%. From 16-24 ft, that number increase to `r round(nrow(gasol[gasol$SHOT_ZONE_RANGE == "16-24 ft." & gasol$SHOT_MADE_FLAG == '1',])/ nrow(gasol[gasol$SHOT_ZONE_RANGE == "16-24 ft." ,])*100, 0)`%. His three point numbers were mentioned above.  
+
+So with the addition of Gasol, the Spurs have a surplus of relatively efficient shooting from mid-range. They're going to miss Duncan's offensive presence around the rim, where they'll hoepfully limit the number of shots Gasol takes. It's a gap they should be able to fill with Aldridge. 
+
+```{r aldridge data pull}
+playerId <- 200746
+
+url <- paste0("http://stats.nba.com/stats/shotchartdetail?Period=0&VsConference=&LeagueID=00&", 
+              "LastNGames=0&TeamID=", teamId, "&Position=&Location=&Outcome=&",
+              "ContextMeasure=", context, "&DateFrom=&StartPeriod=&DateTo=&OpponentTeamID=0&",
+              "ContextFilter=&RangeType=&Season=", paste0(season, "-", substr(season + 1, 3, 4)),
+              "&AheadBehind=&PlayerID=", playerId,  
+              "&EndRange=&VsDivision=&PointDiff=&RookieYear=&GameSegment=&Month=0&ClutchTime=&",
+              "StartRange=&EndPeriod=&SeasonType=Regular+Season&SeasonSegment=&",
+             # "GameID=", paste0("00", substr(season, 1, 1), substr(season, 3, 4), "0", gameId))
+             "GameID=")
+raw <- fromJSON(file = url)
+aldridge <-  data.frame(t(sapply(raw$resultSets[[1]]$rowSet, function(x) unlist(x))))
+names(aldridge) <- raw$resultSets[[1]]$headers
+aldridge$LOC_X <- as.numeric(levels(aldridge$LOC_X))[aldridge$LOC_X]
+aldridge$LOC_Y <- as.numeric(levels(aldridge$LOC_Y))[aldridge$LOC_Y]
+
+accuracy <- as.data.frame.matrix(t(table(aldridge$EVENT_TYPE, aldridge$SHOT_ZONE_BASIC)))
+accuracy$pct <- round(accuracy$`Made Shot` / rowSums(accuracy) * 100, 2)
+accuracy <- accuracy[complete.cases(accuracy), ]
+loc <- aldridge %>% group_by(SHOT_ZONE_BASIC) %>% summarize(x = mean(LOC_X), y = mean(LOC_Y))
+accuracy <- cbind(accuracy, loc[, 2:3])
+overall <- round(sum(accuracy$`Made Shot`) / 
+                   (sum(accuracy$`Made Shot`) + sum(accuracy$`Missed Shot`)) * 100, 2)
+```
+
+
+```{r aldridge shot chart hex}
+#TODO consider cutting off near the top of the key
+ 
+ggplot(aldridge, aes(x = LOC_X * -1, y = LOC_Y * -1, z = as.numeric(SHOT_MADE_FLAG) - 1)) + 
+  inset_raster(readPNG("nba-halfcourt.png"), xmin = -250, xmax = 250, ymin = -420, ymax = 50) +
+  lims(x = c(-250, 250), y = c(-420, 50)) +
+  coord_fixed() +
+  theme(line = element_blank(), 
+        rect = element_blank(), 
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks.length = unit(0, "cm"), 
+        legend.position = c(0.1, 0.13),
+        legend.text = element_text(size = 14),
+        legend.title = element_blank(),
+        panel.margin = unit(0, "lines"), 
+        plot.margin = unit(c(2, 0, 0, 0), "lines"),
+        plot.title = element_text(size = 18, margin = margin(t = -20))
+  )  +
+  ggtitle("LMA\n2015 - 2016 FGA") +
+  annotate("text", x = 200, y = -405, label = paste(overall, "Overall"), size = 6, fontface = 2) +
+  stat_summary_hex() +
+  scale_fill_gradient(low = "darkblue", high = "lightblue")
+
+```
+
+LaMarcus's numbers were solid from all over the court last season (except from downtown); he averaged an overall `r overall` FG%. In the restricted area he shot a stellar `r round(nrow(aldridge[aldridge$SHOT_ZONE_BASIC == "Restricted Area" & aldridge$SHOT_MADE_FLAG == 1, ]) / nrow(aldridge[aldridge$SHOT_ZONE_BASIC == "Restricted Area", ]) * 100, 0)`%. That's good news for the Spurs. They may be able to move Aldridge into more of a center position on offense, and keep Gasol further back, where he can hit those mid to long range shots and the occasional three.  
+
+```{r}
+aldridge_num_games <- length(unique(aldridge$GAME_ID))
+aldridge_paint_shots <- nrow(aldridge[aldridge$SHOT_ZONE_BASIC == "Restricted Area" | aldridge$SHOT_ZONE_BASIC == "In The Paint (Non-RA)",]) / aldridge_num_games
+aldridge_paint_pct <- nrow(aldridge[(aldridge$SHOT_ZONE_BASIC == "Restricted Area" | aldridge$SHOT_ZONE_BASIC == "In The Paint (Non-RA)") & aldridge$SHOT_MADE_FLAG == 1,]) / nrow(aldridge[aldridge$SHOT_ZONE_BASIC == "Restricted Area" | aldridge$SHOT_ZONE_BASIC == "In The Paint (Non-RA)",])
+aldridge_mid_shots <- nrow(aldridge[aldridge$SHOT_ZONE_BASIC == "Mid-Range",]) / aldridge_num_games
+aldridge_mid_pct <- nrow(aldridge[(aldridge$SHOT_ZONE_BASIC == "Mid-Range") & aldridge$SHOT_MADE_FLAG == 1,]) / nrow(aldridge[aldridge$SHOT_ZONE_BASIC == "Mid-Range",])
+aldridge_mid_pts <- aldridge_paint_shots  * aldridge_mid_pct * 2
+aldridge_paint_pts <- aldridge_mid_shots * aldridge_paint_pct * 2
+
+gasol_num_games <- length(unique(gasol$GAME_ID))
+gasol_paint_shots <- nrow(gasol[gasol$SHOT_ZONE_BASIC == "Restricted Area" | gasol$SHOT_ZONE_BASIC == "In The Paint (Non-RA)",]) / gasol_num_games
+gasol_paint_pct <- nrow(gasol[(gasol$SHOT_ZONE_BASIC == "Restricted Area" | gasol$SHOT_ZONE_BASIC == "In The Paint (Non-RA)") & gasol$SHOT_MADE_FLAG == 1,]) / nrow(gasol[gasol$SHOT_ZONE_BASIC == "Restricted Area" | gasol$SHOT_ZONE_BASIC == "In The Paint (Non-RA)",])
+gasol_mid_shots <- nrow(gasol[gasol$SHOT_ZONE_BASIC == "Mid-Range",]) / gasol_num_games
+gasol_mid_pct <- nrow(gasol[(gasol$SHOT_ZONE_BASIC == "Mid-Range") & gasol$SHOT_MADE_FLAG == 1,]) / nrow(gasol[gasol$SHOT_ZONE_BASIC == "Mid-Range",])
+gasol_mid_pts <- gasol_paint_shots * gasol_mid_pct * 2
+gasol_paint_pts <- gasol_mid_shots * gasol_paint_pct * 2
+
+```
+
+That leaves us with a model where Aldridge replaces Duncan, and Gasol replaces Aldridge. Let's see how that might play out. LaMarcus will likely see the same amount of minutes as he did last season. Now, to better model his hypothetical contributions at center, let's flip the percentage of mid to long range shots he took with his percentage of shots in the paint (and assume he continues to take [miss] the same number of threes as last season). That would be `r aldridge_paint_shots` mid-range shots * `r aldridge_mid_pct`% = `r aldridge_mid_pts` mid-range PPG. And then we get the paint numbers: 
+`r aldridge_mid_shots` paint shots * `r aldridge_paint_pct`% = `r aldridge_paint_pts` paint PPG. Add in his free throws (let's hope he doesn't inherit Tim's FT% here), and we're looking at a total of `r aldridge_paint_pts + aldridge_mid_pts + 3.5` PPG from Aldridge. For Gasol, we'll assume he plays starter minutes like he did last season. That results in `r gasol_paint_pts + gasol_mid_pts + 3.2 + 0.9` PPG.  
+
+I'm hesitant to explore how this affects the Spurs' total points, since there's no telling what's going to happen with bench minutes. Either way, it looks like they'll be able to cover on offense what they lose with Duncan.  

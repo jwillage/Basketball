@@ -65,5 +65,5 @@ ggplot(game, aes(x = LOC_X * -1, y = LOC_Y * -1)) +
         plot.title = element_text(size = 18, margin = margin(t = -20))
         )  +
   ggtitle(paste(date, away, awayPts, "@", home, homePts, "\n", team, "shots")) + 
-  annotate("text", x = 200, y = -405, label = paste(overall, "Overall"), size = 6, fontface = 2)
+  annotate("text", x = 200, y = -405, label = paste0(overall, "% Overall"), size = 6, fontface = 2)
 dev.off()
