@@ -197,9 +197,51 @@ aldridge_makes_mid <- nrow(aldridge[aldridge$SHOT_ZONE_BASIC == "Mid-Range" &
 aldridge_pct_paint <- (aldridge_makes_RA + aldridge_makes_non_RA) / 
   (aldridge_shots_RA + aldridge_shots_non_RA)
 aldridge_pct_mid <- aldridge_makes_mid / aldridge_shots_mid
+aldridge_shots_8_16 <- nrow(aldridge[aldridge$SHOT_ZONE_RANGE == "8-16 ft." ,])
+aldridge_makes_8_16 <- nrow(aldridge[aldridge$SHOT_ZONE_RANGE == "8-16 ft." & aldridge$SHOT_MADE_FLAG == '1',])
+aldridge_shots_16_24 <- nrow(aldridge[aldridge$SHOT_ZONE_RANGE == "16-24 ft." ,])
+aldridge_makes_16_24 <- nrow(aldridge[aldridge$SHOT_ZONE_RANGE == "16-24 ft." & aldridge$SHOT_MADE_FLAG == '1',])
 ```
 
-LaMarcus' numbers were solid from all over the court last season (except from downtown); he averaged an overall `r round(aldridge_makes/aldridge_shots * 100, 1)` FG%. In the restricted area he shot a stellar `r round(aldridge_makes_RA / aldridge_shots_RA * 100, 1)`%. That's good news for the Spurs. They may be able to move Aldridge into more of a center position on offense, and keep Gasol further back, where he can hit those mid-to long-range shots and the occasional three.  
+LaMarcus' numbers were solid from all over the court last season (except from downtown); he averaged an overall `r round(aldridge_makes/aldridge_shots * 100, 1)` FG%. In the restricted area he shot a stellar `r round(aldridge_makes_RA / aldridge_shots_RA * 100, 1)`%. Here is how Aldridge and Gasol's shooting percentages compare from different areas on the floor. The black reference bars are Duncan's numbers.  
+
+```{r duncan-gasol-aldridge-bullet-chart,  fig.height = 5, fig.width = 8}
+avg <- cbind(Player = "Duncan", pct = duncan_makes_RA / duncan_shots_RA, metric = "Restricted Area")
+avg <- rbind(avg, cbind(Player = "Gasol", pct = gasol_makes_RA / gasol_shots_RA, metric = "Restricted Area"))
+avg <- rbind(avg, cbind(Player = "Duncan", pct = duncan_makes_non_RA / duncan_shots_non_RA, metric = "Non-Restricted\nArea"))
+avg <- rbind(avg, cbind(Player = "Aldridge", pct = aldridge_makes_non_RA / aldridge_shots_non_RA, metric = "Non-Restricted\nArea"))
+avg <- rbind(avg, cbind(Player = "Gasol", pct = gasol_makes_non_RA / gasol_shots_non_RA, metric = "Non-Restricted\nArea"))
+avg <- rbind(avg, cbind(Player = "Duncan", pct = duncan_makes_8_16 / duncan_shots_8_16, metric = "8-16 ft"))
+avg <- rbind(avg, cbind(Player = "Aldridge", pct = aldridge_makes_8_16 / aldridge_shots_8_16, metric = "8-16 ft"))
+avg <- rbind(avg, cbind(Player = "Gasol", pct = gasol_makes_8_16 / gasol_shots_8_16, metric = "8-16 ft"))
+avg <- rbind(avg, cbind(Player = "Duncan", pct = duncan_makes_16_24 / duncan_shots_16_24, metric = "16-24 ft"))
+avg <- rbind(avg, cbind(Player = "Gasol", pct = gasol_makes_16_24 / gasol_shots_16_24, metric = "16-24 ft"))
+avg <- rbind(avg, cbind(Player = "Aldridge", pct = aldridge_makes_RA / aldridge_shots_RA, metric = "Restricted Area"))
+avg <- rbind(avg, cbind(Player = "Aldridge", pct = aldridge_makes_16_24 / aldridge_shots_16_24, metric = "16-24 ft"))
+avg <- as.data.frame(avg)
+avg$pct <- as.numeric(as.character(avg$pct))
+
+ggplot() + 
+  geom_bar(data = avg[avg$Player != "Duncan",], 
+           aes(x = metric, y = pct, fill = Player), stat = "identity", width = 0.4,
+           position = "dodge") +
+  coord_flip() +
+  guides(fill = guide_legend(reverse = TRUE), color = guide_legend(reverse = TRUE)) +
+  geom_point(data = avg[avg$Player == "Duncan", ], aes(x = metric, y = pct, stat = "identity"), 
+             shape = 124, size = 15) +
+  labs(y = "Percentage", x = "Shot Zone", 
+       title = "Player Shooting Percentages with Duncan References\n2015-16 Regular Season FG") +
+  theme(
+        panel.margin = unit(0, "lines"), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(color = "black", fill = "white"),
+        panel.grid.major.x = element_line(color = "grey80"),
+        legend.position = c(0.9, 0.1)
+  ) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 0.8))
+```
+
+Aldridge's numbers in the paint are good news for the Spurs. They may be able to move him into more of a center position on offense, and keep Gasol further back, where he can hit those mid-to long-range shots and the occasional three.  
 
 ```{r}
 gasol_shots_paint <- gasol_shots_RA + gasol_shots_non_RA

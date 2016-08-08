@@ -6,11 +6,11 @@ August 4, 2016
 
 
 
-It's been an emotional summer for the Spurs as they bid goodbye to the man who was an embodiment of the organization for nearly two decades. While there's no replacing what Tim Duncan brought every night for the Spurs, their front office did it's job as the team transitions to a new look front court. Here we'll take a look at what the team loses and gains going into next season, and some options to make the most of the situation.  
+It's been an emotional summer for the Spurs as they bid goodbye to the man who was an embodiment of the organization for nearly two decades. While there's no replacing what Tim Duncan brought every night for the Spurs, their front office did its job as the team transitions to a new look front court. Here we'll explore what the team loses and gains going into next season, and some options to make the most of the situation.  
 
 
 
-When I initially pulled the data[^1], I thought there had been made a mistake. I had every shot taken by every player last season, 207,895 attempts in all. James Harden led all players with 1,617. Steph Curry was next with1,598. But for Duncan, there were only 441 shots. That couldn’t be right. But it was. Tim played 61 regular season games, and averaged 7.2 FGA/game. He indeed had just 441 shot attempts last season. Here’s Duncan’s shot chart over the entire regular season (note: 1 shot from behind half-court omitted).  
+When I initially pulled the data[^1], I thought there had been a mistake. The data contains every shot taken by every player last season: 207,895 attempts in all. James Harden led all players with 1,617. Steph Curry was next with 1,598. But for Duncan, there were only 441 shots. I thought that couldn’t be right, but it was. Tim played 61 regular season games, and averaged 7.2 FGA/game. He indeed had just 441 shot attempts last season. Here’s Duncan’s shot chart over the entire regular season (note: 1 shot from behind half-court omitted).  
 
 ![](figure/duncan-shot-chart-1.png)
 
@@ -37,7 +37,7 @@ Gasol had an overall FG% last season of 46.9%, less than Tim's 48.8%. His iPPM o
 
 What immediately stands out here are the spots outside the three point arc. Gasol attempted 69 threes last season (0.96/gm), and converted 34.8% of them. Factoring in his made threes, Gasol's eFG% is 48.1%, closer, but still below Tim's (48.8%). 
 
-Looking at the chart, Gasol *appears* to be pretty good from the restricted area, but not as good as Duncan. He took 27% of his shots from there, and converted at a 57.2% clip. That's actually lower than the league average for the season, which was 60.2%. In the paint outside the RA, Gasol attempted 18% of his shots, making a dismal 38.6% of them. Fortunately, he's better further out. From 8-16 ft, Gasol converted 43.6%. From 16-24 ft, that number increase to 45.2%.  
+Looking at the chart, Gasol *appears* to be pretty good from the restricted area, but not as good as Duncan. He took 27% of his shots from there, and converted at a 57.2% clip. That's actually lower than the league average for the season, which was 60.2%. In the paint outside the RA, Gasol attempted 18% of his shots, making a dismal 38.6% of them. Fortunately, he's better further out. From 8-16 ft, Gasol converted 43.6%. From 16-24 ft, that number increases to 45.2%.  
 
 So with the addition of Gasol, the Spurs have a surplus of relatively efficient shooting from mid-range. They're going to miss Duncan's offensive presence around the rim, where they'll hoepfully limit the number of shots Gasol takes. It's a gap they should be able to fill with Aldridge. 
 
@@ -48,7 +48,11 @@ So with the addition of Gasol, the Spurs have a surplus of relatively efficient 
 
 
 
-LaMarcus' numbers were solid from all over the court last season (except from downtown); he averaged an overall 51.3 FG%. In the restricted area he shot a stellar 70.8%. That's good news for the Spurs. They may be able to move Aldridge into more of a center position on offense, and keep Gasol further back, where he can hit those mid-to long-range shots and the occasional three.  
+LaMarcus' numbers were solid from all over the court last season (except from downtown); he averaged an overall 51.3 FG%. In the restricted area he shot a stellar 70.8%. Here is how Aldridge and Gasol's shooting percentages compare from different areas on the floor. The black reference bars are Duncan's numbers.  
+
+![](figure/duncan-gasol-aldridge-bullet-chart-1.png)
+
+Aldridge's numbers in the paint are good news for the Spurs. They may be able to move him into more of a center position on offense, and keep Gasol further back, where he can hit those mid-to long-range shots and the occasional three.  
 
 
 
