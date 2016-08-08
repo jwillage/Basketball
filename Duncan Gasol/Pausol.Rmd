@@ -87,7 +87,7 @@ It's no surprise that Timmy's strongest areas are in the paint, especially withi
 
 His `r round(sum(duncan$SHOT_MADE_FLAG ==1)/nrow(duncan) * 100, 1)`% overall field goal percentage for the season was pretty good compared to the league average of 45.2%.
 
-Adding in his 1.5 made free throws per game[^3], Duncan ended up contributing 8.6 PPG in the 2015-16 season, by far his lowest. While it's true that he also played the fewest minutes of his career (25.2 MPG), his individiual points per minute suffered a career low, finishing at 0.34 (his career high was 0.63 iPPM in 2001-02)[^4]. While seeing Timmy retire might be the low point of my life, it was probably for the best. But he went out fighting, and I love that.  
+Adding in his 1.5 made free throws per game[^3], Duncan ended up contributing 8.6 PPG in the 2015-16 season, by far his lowest. While it's true that he also played the fewest minutes of his career (25.2 MPG), his individual points per minute suffered a career low, finishing at 0.34 (his career high was 0.63 iPPM in 2001-02)[^4]. While seeing Timmy retire might be the low point of my life, it was probably for the best. But he went out fighting, and I love that.  
 
 That brings us to the coming season. While the Spurs didn't accomplish their number one goal of signing Kevin Durant, they still did very well in securing free agent Pau Gasol. Gasol's numbers during his two seasons with Chicago makes it look like he'll be a great fit on paper for the Spurs in Duncan's absence.  
 
@@ -147,7 +147,7 @@ What immediately stands out here are the spots outside the three point arc. Gaso
 
 Looking at the chart, Gasol *appears* to be pretty good from the restricted area, but not as good as Duncan. He took `r round(gasol_shots_RA/nrow(gasol) * 100, 0)`% of his shots from there, and converted at a `r round(gasol_makes_RA/ gasol_shots_RA * 100, 1)`% clip. That's actually lower than the league average for the season, which was 60.2%. In the paint outside the RA, Gasol attempted `r round(gasol_shots_non_RA / gasol_shots * 100, 0)`% of his shots, making a dismal `r round(nrow(gasol[gasol$SHOT_ZONE_BASIC == "In The Paint (Non-RA)" & gasol$SHOT_MADE_FLAG == 1, ]) / nrow(gasol[gasol$SHOT_ZONE_BASIC == "In The Paint (Non-RA)", ]) * 100, 1)`% of them. Fortunately, he's better further out. From 8-16 ft, Gasol converted `r round(gasol_makes_8_16 / gasol_shots_8_16 * 100, 1)`%. From 16-24 ft, that number increases to `r round(gasol_makes_16_24 / gasol_shots_16_24 * 100, 1)`%.  
 
-So with the addition of Gasol, the Spurs have a surplus of relatively efficient shooting from mid-range. They're going to miss Duncan's offensive presence around the rim, where they'll hoepfully limit the number of shots Gasol takes. It's a gap they should be able to fill with Aldridge. 
+So with the addition of Gasol, the Spurs have a surplus of relatively efficient shooting from mid-range. They're going to miss Duncan's offensive presence around the rim, where they'll hopefully limit the number of shots Gasol takes. It's a gap they should be able to fill with Aldridge. 
 
 ```{r aldridge data pull}
 aldridge <- game[game$PLAYER_NAME == "LaMarcus Aldridge", ]
