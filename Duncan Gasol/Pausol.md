@@ -12,7 +12,7 @@ It's been an emotional summer for the Spurs as they bid goodbye to the man who w
 
 When I initially pulled the data[^1], I thought there had been made a mistake. I had every shot taken by every player last season, 207,895 attempts in all. James Harden led all players with 1,617. Steph Curry was next with1,598. But for Duncan, there were only 441 shots. That couldn’t be right. But it was. Tim played 61 regular season games, and averaged 7.2 FGA/game. He indeed had just 441 shot attempts last season. Here’s Duncan’s shot chart over the entire regular season (note: 1 shot from behind half-court omitted).  
 
-![](figure/duncan shot chart hex-1.png)
+![](figure/duncan-shot-chart-1.png)
 
 
 
@@ -30,7 +30,7 @@ To start with, Gasol attempted 995 shots, more than twice as many as Duncan. Tak
 
 Gasol had an overall FG% last season of 46.9%, less than Tim's 48.8%. His iPPM of 0.52 is higher than Tim's, indicating that he was shooting more frequently. Here is Gasol's 2015-16 shot chart.  
 
-![](figure/gasol shot chart hex-1.png)
+![](figure/gasol-shot-chart-1.png)
 
 
 
@@ -44,7 +44,7 @@ So with the addition of Gasol, the Spurs have a surplus of relatively efficient 
 
 
 
-![](figure/aldridge shot chart hex-1.png)
+![](figure/aldridge-shot-chart-1.png)
 
 
 

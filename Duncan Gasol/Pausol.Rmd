@@ -21,7 +21,7 @@ library(ggplot2)
 library(ggmap)
 ```
 
-It's been an emotional summer for the Spurs as they bid goodbye to the man who was an embodiment of the organization for nearly two decades. While there's no replacing what Tim Duncan brought every night for the Spurs, their front office did it's job as the team transitions to a new look front court. Here we'll take a look at what the team loses and gains going into next season, and some options to make the most of the situation.  
+It's been an emotional summer for the Spurs as they bid goodbye to the man who was an embodiment of the organization for nearly two decades. While there's no replacing what Tim Duncan brought every night for the Spurs, their front office did its job as the team transitions to a new look front court. Here we'll explore what the team loses and gains going into next season, and some options to make the most of the situation.  
 
 ```{r data pull}
 season <- 2015
@@ -42,9 +42,9 @@ game$LOC_Y <- as.numeric(levels(game$LOC_Y))[game$LOC_Y]
 duncan <- game[game$PLAYER_NAME == "Tim Duncan", ]
 ```
 
-When I initially pulled the data[^1], I thought there had been made a mistake. I had every shot taken by every player last season, `r prettyNum(nrow(game), big.mark = ",")` attempts in all. James Harden led all players with `r prettyNum(nrow(game[game$PLAYER_NAME == "James Harden", ]), big.mark = ",")`. Steph Curry was next with`r prettyNum(nrow(game[game$PLAYER_NAME == "Stephen Curry", ]), big.mark = ",")`. But for Duncan, there were only `r nrow(duncan)` shots. That couldn’t be right. But it was. Tim played `r length(unique(duncan$GAME_ID))` regular season games, and averaged `r round(nrow(duncan)/length(unique(duncan$GAME_ID)), 1)` FGA/game. He indeed had just `r nrow(duncan)` shot attempts last season. Here’s Duncan’s shot chart over the entire regular season (note: 1 shot from behind half-court omitted).  
+When I initially pulled the data[^1], I thought there had been a mistake. The data contains every shot taken by every player last season: `r prettyNum(nrow(game), big.mark = ",")` attempts in all. James Harden led all players with `r prettyNum(nrow(game[game$PLAYER_NAME == "James Harden", ]), big.mark = ",")`. Steph Curry was next with `r prettyNum(nrow(game[game$PLAYER_NAME == "Stephen Curry", ]), big.mark = ",")`. But for Duncan, there were only `r nrow(duncan)` shots. I thought that couldn’t be right, but it was. Tim played `r length(unique(duncan$GAME_ID))` regular season games, and averaged `r round(nrow(duncan)/length(unique(duncan$GAME_ID)), 1)` FGA/game. He indeed had just `r nrow(duncan)` shot attempts last season. Here’s Duncan’s shot chart over the entire regular season (note: 1 shot from behind half-court omitted).  
 
-```{r duncan shot chart hex}
+```{r duncan-shot-chart}
 ggplot(duncan, aes(x = LOC_X * -1, y = LOC_Y * -1, z = as.numeric(SHOT_MADE_FLAG) - 1)) + 
   inset_raster(readPNG("../nba-halfcourt.png"), xmin = -250, xmax = 250, ymin = -420, ymax = 50) +
   lims(x = c(-250, 250), y = c(-420, 50)) +
@@ -99,7 +99,7 @@ To start with, Gasol attempted `r nrow(gasol)` shots, more than twice as many as
 
 Gasol had an overall FG% last season of `r round(sum(gasol$SHOT_MADE_FLAG ==1)/nrow(gasol) * 100, 1)`%, less than Tim's `r round(sum(duncan$SHOT_MADE_FLAG ==1)/nrow(duncan)*100, 1)`%. His iPPM of 0.52 is higher than Tim's, indicating that he was shooting more frequently. Here is Gasol's 2015-16 shot chart.  
 
-```{r gasol shot chart hex}
+```{r gasol-shot-chart}
 ggplot(gasol, aes(x = LOC_X * -1, y = LOC_Y * -1, z = as.numeric(SHOT_MADE_FLAG) - 1)) + 
   inset_raster(readPNG("../nba-halfcourt.png"), xmin = -250, xmax = 250, ymin = -420, ymax = 50) +
   lims(x = c(-250, 250), y = c(-420, 50)) +
@@ -145,7 +145,7 @@ gasol_makes_16_24 <- nrow(gasol[gasol$SHOT_ZONE_RANGE == "16-24 ft." & gasol$SHO
 
 What immediately stands out here are the spots outside the three point arc. Gasol attempted `r gasol_shots_3` threes last season (`r round(gasol_shots_3 / gasol_games, 2)`/gm), and converted `r round(gasol_makes_3 / gasol_shots_3 * 100, 1)`% of them. Factoring in his made threes, Gasol's eFG% is `r round((gasol_makes_3 * .5 + gasol_makes) /gasol_shots * 100, 1)`%, closer, but still below Tim's (`r round(sum(duncan$SHOT_MADE_FLAG ==1)/nrow(duncan) * 100, 1)`%). 
 
-Looking at the chart, Gasol *appears* to be pretty good from the restricted area, but not as good as Duncan. He took `r round(gasol_shots_RA/nrow(gasol) * 100, 0)`% of his shots from there, and converted at a `r round(gasol_makes_RA/ gasol_shots_RA * 100, 1)`% clip. That's actually lower than the league average for the season, which was 60.2%. In the paint outside the RA, Gasol attempted `r round(gasol_shots_non_RA / gasol_shots * 100, 0)`% of his shots, making a dismal `r round(nrow(gasol[gasol$SHOT_ZONE_BASIC == "In The Paint (Non-RA)" & gasol$SHOT_MADE_FLAG == 1, ]) / nrow(gasol[gasol$SHOT_ZONE_BASIC == "In The Paint (Non-RA)", ]) * 100, 1)`% of them. Fortunately, he's better further out. From 8-16 ft, Gasol converted `r round(gasol_makes_8_16 / gasol_shots_8_16 * 100, 1)`%. From 16-24 ft, that number increase to `r round(gasol_makes_16_24 / gasol_shots_16_24 * 100, 1)`%.  
+Looking at the chart, Gasol *appears* to be pretty good from the restricted area, but not as good as Duncan. He took `r round(gasol_shots_RA/nrow(gasol) * 100, 0)`% of his shots from there, and converted at a `r round(gasol_makes_RA/ gasol_shots_RA * 100, 1)`% clip. That's actually lower than the league average for the season, which was 60.2%. In the paint outside the RA, Gasol attempted `r round(gasol_shots_non_RA / gasol_shots * 100, 0)`% of his shots, making a dismal `r round(nrow(gasol[gasol$SHOT_ZONE_BASIC == "In The Paint (Non-RA)" & gasol$SHOT_MADE_FLAG == 1, ]) / nrow(gasol[gasol$SHOT_ZONE_BASIC == "In The Paint (Non-RA)", ]) * 100, 1)`% of them. Fortunately, he's better further out. From 8-16 ft, Gasol converted `r round(gasol_makes_8_16 / gasol_shots_8_16 * 100, 1)`%. From 16-24 ft, that number increases to `r round(gasol_makes_16_24 / gasol_shots_16_24 * 100, 1)`%.  
 
 So with the addition of Gasol, the Spurs have a surplus of relatively efficient shooting from mid-range. They're going to miss Duncan's offensive presence around the rim, where they'll hoepfully limit the number of shots Gasol takes. It's a gap they should be able to fill with Aldridge. 
 
@@ -154,7 +154,7 @@ aldridge <- game[game$PLAYER_NAME == "LaMarcus Aldridge", ]
 ```
 
 
-```{r aldridge shot chart hex}
+```{r aldridge-shot-chart}
 ggplot(aldridge, aes(x = LOC_X * -1, y = LOC_Y * -1, z = as.numeric(SHOT_MADE_FLAG) - 1)) + 
   inset_raster(readPNG("../nba-halfcourt.png"), xmin = -250, xmax = 250, ymin = -420, ymax = 50) +
   lims(x = c(-250, 250), y = c(-420, 50)) +
