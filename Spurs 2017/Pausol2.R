@@ -34,8 +34,6 @@ url <- paste0("http://stats.nba.com/stats/shotchartdetail?Period=0&VsConference=
               "&AheadBehind=&PlayerID=0&EndRange=&VsDivision=&PointDiff=&RookieYear=",
               "&GameSegment=&Month=0&ClutchTime=&StartRange=&EndPeriod=&SeasonType=Regular+Season",
               "&SeasonSegment=&GameID=&PlayerPosition=")
-#raw <- fromJSON(file = url)
-
 
 raw <- httr::GET(url, add_headers(
   'Accept-Language' = 'en-US,en;q=0.8,af;q=0.6',
@@ -93,8 +91,7 @@ ggplot(spurs_both, aes(x=OWS, y=DWS, group=X)) +
 
 
 
-summarizeDistance <- function(playerName, seasonData) {
-  player <- seasonData[seasonData$PLAYER_NAME == playerName, ]
+summarizeDistance <- function(player) {
   player_shots <- nrow(player)
   player_games <- length(unique(player$GAME_ID))
   player_makes <- nrow(player[player$SHOT_MADE_FLAG == 1,])
@@ -110,21 +107,34 @@ summarizeDistance <- function(playerName, seasonData) {
   player_makes_8_16 <- nrow(player[player$SHOT_ZONE_RANGE == "8-16 ft." & player$SHOT_MADE_FLAG == '1',])
   player_shots_16_24 <- nrow(player[player$SHOT_ZONE_RANGE == "16-24 ft." ,])
   player_makes_16_24 <- nrow(player[player$SHOT_ZONE_RANGE == "16-24 ft." & player$SHOT_MADE_FLAG == '1',])
+  player_shots_24_plus <- nrow(player[player$SHOT_ZONE_RANGE == "24+ ft." ,])
+  player_makes_24_plus <- nrow(player[player$SHOT_ZONE_RANGE == "24+ ft." & player$SHOT_MADE_FLAG == '1',])
+  
+  player_pct_RA <- player_makes_RA / player_shots_RA 
+  player_pct_non_RA <- player_makes_non_RA / player_shots_non_RA
+  player_pct_8_16 <- player_makes_8_16 / player_shots_8_16
+  player_pct_16_24 <- player_makes_16_24 / player_shots_16_24
+  player_pct_24_plus <- player_makes_24_plus / player_shots_24_plus
   
   ret <- list(player_shots=player_shots, player_games=player_games, player_makes=player_makes, 
               player_shots_3=player_shots_3, player_makes_3=player_makes_3, 
               player_shots_RA=player_shots_RA, player_makes_RA=player_makes_RA, 
               player_shots_non_RA=player_shots_non_RA, player_makes_non_RA=player_makes_non_RA,
               player_shots_8_16=player_shots_8_16, player_makes_8_16=player_makes_8_16, 
-              player_shots_16_24=player_shots_16_24, player_makes_16_24=player_makes_16_24)
+              player_shots_16_24=player_shots_16_24, player_makes_16_24=player_makes_16_24,
+              player_pct_RA=player_pct_RA,player_pct_non_RA=player_pct_non_RA,
+              player_pct_8_16=player_pct_8_16, player_pct_16_24=player_pct_16_24,
+              player_shots_24_plus=player_shots_24_plus, player_makes_24_plus=player_makes_24_plus,
+              player_pct_24_plus=player_pct_24_plus)
   
 }
 
-gasol <- summarizeDistance("Pau Gasol", game)
-aldridge <- summarizeDistance("LaMarcus Aldridge", game)
-gasol.2015 <- summarizeDistance("Pau Gasol", game.2015)
-aldridge.2015 <- summarizeDistance("LaMarcus Aldridge", game.2015)
+gasol <- summarizeDistance(game[game$PLAYER_NAME == "Pau Gasol", ])
+aldridge <- summarizeDistance(game[game$PLAYER_NAME == "LaMarcus Aldridge", ])
+gasol.2015 <- summarizeDistance(game.2015[game.2015$PLAYER_NAME ==  "Pau Gasol", ])
+aldridge.2015 <- summarizeDistance(game.2015[game.2015$PLAYER_NAME == "LaMarcus Aldridge", ])
 
+# todo clean up below now that percentages have been added in player summaries
 
 avg <- NULL
 avg <- cbind(cbind(Player = "Gasol", pct = gasol$player_makes_RA / gasol$player_shots_RA, metric = "Restricted Area"))
@@ -152,19 +162,12 @@ avg$season <- 2016
 avg[((nrow(avg)/2)+1):nrow(avg),]$season <- 2015
 
 ggplot() + 
-  # may have to do the reference as another bar, hidden by a white filled bar?
-  geom_bar(data = avg[avg$Player != "Duncan" & avg$season == 2015,],
-           aes(x = metric, y = pct, group = Player
-               , fill=Player
-               ), stat = "identity", width = 0.5,
-           alpha=.2,
-           #fill="white", 
-           color="grey80",
-           position = "dodge") +
-  geom_bar(data = avg[avg$Player != "Duncan" & avg$season == 2016,],
+  geom_bar(data = avg[avg$season == 2015,],
+           aes(x = metric, y = pct, group = Player, fill=Player), 
+           stat = "identity", width = 0.5, alpha=.2, color="grey80", position = "dodge") +
+  geom_bar(data = avg[avg$season == 2016,],
            aes(x = metric, y = pct, fill = Player), stat = "identity", width = 0.4,
-           color="black",
-           position = "dodge") +
+           color="black", position = "dodge") +
   coord_flip() +
   guides(fill = guide_legend(reverse = TRUE), color = guide_legend(reverse = TRUE)) +
 
@@ -182,12 +185,29 @@ ggplot() +
 As seen in the graph, Aldridge's numbers dropped across the board, while Gasol's mostly improved (similarly represented in their respective eFG%).
 Let's see how the team fared against the rest of the league'
 
+game$xy <- paste(game$LOC_X, game$LOC_Y)
 spurs <- game[game$VTM == 'SAS' | game$HTM == 'SAS',]
-leage <- game[game$VTM != 'SAS' & game$HTM != 'SAS',]
+league <- game[game$VTM != 'SAS' & game$HTM != 'SAS',]
 
+spursCoordSummary <- spurs %>%
+    group_by(LOC_X, LOC_Y) %>%
+    summarize(makes = sum((SHOT_MADE_FLAG==1)), attempts = n()) %>%
+    mutate(pct = makes/attempts)
 
+#  need to weight...possibly.
 
-ggplot(game[game$VTM == 'SAS' | game$HTM == 'SAS',], aes(x = LOC_X * -1, y = LOC_Y * -1, z = as.numeric(SHOT_MADE_FLAG) - 1)) + 
+leagueCoordSummary <- league %>%
+  group_by(LOC_X, LOC_Y) %>%
+  summarize(makes = sum((SHOT_MADE_FLAG==1)), attempts = n()) %>%
+  mutate(pct = makes/attempts)  
+
+combinedCoordSummary <- spursCoordSummary %>%
+ inner_join(leagueCoordSummary, by=c("LOC_X" = "LOC_X", "LOC_Y" = "LOC_Y"),            
+             suffix=c(".spurs", ".league")) %>%
+  mutate(relativePct = pct.spurs - pct.league)
+  
+
+ggplot(combinedCoordSummary, aes(x = LOC_X * -1, y = LOC_Y * -1, z = relativePct)) + 
   inset_raster(readPNG("../nba-halfcourt.png"), xmin = -250, xmax = 250, ymin = -420, ymax = 50) +
   lims(x = c(-250, 250), y = c(-420, 50)) +
   coord_fixed() +
@@ -206,6 +226,30 @@ ggplot(game[game$VTM == 'SAS' | game$HTM == 'SAS',], aes(x = LOC_X * -1, y = LOC
   ggtitle("Spurs vs League\n2016-17 Regular Season FGA") +
   annotate("text", x = 190, y = -405, size = 6, fontface = 2,
            label = paste0(round(sum(duncan$SHOT_MADE_FLAG ==1)/nrow(duncan)*100, 2), "% Overall")) +
-  stat_summary_hex() +
-  scale_fill_gradient(low = "darkblue", high = "lightblue", breaks = c(0, .5, 1), 
-                      labels = c("0%", "50%", "100%"))
+  stat_summary_hex(binwidth = 20) +
+  scale_fill_gradient2(low = "red", mid = "yellow", high = "green", breaks = c(-1, 0, 1), 
+                      labels = c("-100%", "0%", "100%"))
+
+spursShotSummary <- summarizeDistance(spurs)
+leagueShotSummary <- summarizeDistance(league)
+
+relativeShotSummary <- mapply(function(x, y)  x - y,
+       spursShotSummary,
+       leagueShotSummary)
+
+relativeShotSummary[grepl("pct", names(relativeShotSummary))]*100
+
+Relative to the rest of the league, the Spurs overall underperformed scoring in the paint. 
+They got better the further out they shot, beating the league by 3.3% from 16-24 ft (eye roll), 
+and 1.1% from 3.
+
+And so went the regular the season. Into the playoffs the Spurs kept scoring at around the same rate.
+That worked fine against their first two opponents, who SA held to sum(82, 82, 105, 110, 103, 96)/6 (96)
+and sum(126, 96, 92, 125, 107, 75)/6 (104) PPG. But it won't cut it when your defense collapses,
+as every team's does, when they play the Warriors.
+
+' 
+
+
+defensive hex plot
+
