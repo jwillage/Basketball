@@ -183,6 +183,22 @@ ggplot() +
   scale_y_continuous(expand = c(0, 0), limits = c(0, 0.8))
 
 As seen in the graph, Aldridge's numbers dropped across the board, while Gasol's mostly improved (similarly represented in their respective eFG%).
+
+efg.aldridge <- read.csv("dat/aldridge_career.csv")
+efg.aldridge <- efg.aldridge[grepl("\\d{4}", efg.aldridge$Season), ]
+plot(efg.aldridge$eFG.)
+
+efg.gasol <- read.csv("dat/gasol_career.csv")
+efg.gasol <- efg.gasol[grepl("\\d{4}", efg.gasol$Season), ]
+efg.gasol <- efg.gasol[-c(8,9),]
+plot(efg.gasol$eFG.)
+
+ggplot() +
+  geom_point(aes(x=substr(efg.gasol$Season, 1, 4), y=efg.gasol$eFG.), color="#F8766D", size=3) + 
+  geom_point(aes(x=substr(efg.aldridge$Season, 1, 4), y=efg.aldridge$eFG.), color="#00BFC4", size=3) +
+  geom_line(aes(x=substr(efg.gasol$Season, 1, 4), y=efg.gasol$eFG., group=1), color="#F8766D") + 
+  geom_line(aes(x=substr(efg.aldridge$Season, 1, 4), y=efg.aldridge$eFG., group=1), color="#00BFC4")
+
 Let's see how the team fared against the rest of the league'
 
 game$xy <- paste(game$LOC_X, game$LOC_Y)

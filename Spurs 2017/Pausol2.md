@@ -23,7 +23,7 @@ Allow me philosophize for a moment. When thinking about the future, we typically
 That's the grain of salt. 
 
 
-![](figure/efg-1.png)<!-- -->![](figure/efg-2.png)<!-- -->
+![](figure/efg-1.png)<!-- -->
 
 Taking into account his entire career, Aldridge isn't really moving the needle much on his effective FG% from one season to the next. He's got a 49% total eFG%. Gasol, on the other hand, has had some large swings over his longer career. His first 8 years were similar to Aldridge's, no huge fluctuations. His numbers had an upswing when he was traded to the Lakers in '08, then slowly dropped throughout his time there. He had another (smaller) upswing his first year on the Bulls, then dropped, and then another upswing his first year on the Spurs. Spurs fans will hope Pau can buck the trend and keep shooting at a high percentage. 
 
@@ -72,6 +72,6 @@ That worked fine against their first two opponents, who SA held to 96.3
 and 103.5 PPG. But it won't cut it if their defense collapses,
 as every team's does, when they play the Warriors.
 
-
-
+##
+TODO:
 And even Bayesian logic takes into account previous stats as priors. 

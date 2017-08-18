@@ -80,12 +80,30 @@ That's the grain of salt.
 ```{r efg}
 efg.aldridge <- read.csv("dat/aldridge_career.csv")
 efg.aldridge <- efg.aldridge[grepl("\\d{4}", efg.aldridge$Season), ]
-plot(efg.aldridge$eFG.)
+efg.aldridge$Player <- "Aldridge"
 
 efg.gasol <- read.csv("dat/gasol_career.csv")
 efg.gasol <- efg.gasol[grepl("\\d{4}", efg.gasol$Season), ]
-plot(efg.gasol$eFG.)
+efg.gasol <- efg.gasol[-c(8,9),]
+efg.gasol$Player <- "Gasol"
 
+rbind(efg.gasol, efg.aldridge) %>%
+ggplot() +
+  geom_line(aes(x=substr(Season, 1, 4), y=eFG.*100, color=Player, group=Player)) +
+  geom_point(aes(x=substr(Season, 1, 4), y=eFG.*100, color=Player)) +
+  scale_y_continuous(limits=c(45, 60.01), expand=c(0,0)) + 
+  labs(y="Effective FG%", x=NULL,
+       title="Player Career eFG%") +
+  theme(
+    # panel.margin = unit(0, "lines"), 
+    # panel.grid.minor = element_blank(),
+    # panel.background = element_rect(color = "black", fill = "white"),
+    # panel.grid.major.x = element_line(color = "grey80"),
+    # panel.grid.major.y = element_line(color = "grey80"),
+    legend.position = c(0.9, 0.85),
+    legend.background = element_rect(fill="transparent"),
+    legend.key = element_rect(fill="white")
+  )
 ```
 
 Taking into account his entire career, Aldridge isn't really moving the needle much on his effective FG% from one season to the next. He's got a 49% total eFG%. Gasol, on the other hand, has had some large swings over his longer career. His first 8 years were similar to Aldridge's, no huge fluctuations. His numbers had an upswing when he was traded to the Lakers in '08, then slowly dropped throughout his time there. He had another (smaller) upswing his first year on the Bulls, then dropped, and then another upswing his first year on the Spurs. Spurs fans will hope Pau can buck the trend and keep shooting at a high percentage. 
@@ -319,5 +337,4 @@ And so went the regular the season. Into the playoffs the Spurs kept scoring at 
 That worked fine against their first two opponents, who SA held to `r round(sum(82, 82, 105, 110, 103, 96)/6, 1)`
 and `r round(sum(126, 96, 92, 125, 107, 75)/6, 1)` PPG. But it won't cut it if their defense collapses,
 as every team's does, when they play the Warriors.
-
 
