@@ -10,7 +10,7 @@ output:
 ```{r setup, include=FALSE, echo=FALSE, warning=FALSE}
 library(knitr)
 opts_chunk$set(echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE, cache.path = "cache/", 
-               fig.path = "figure/", fig.width = 8, fig.height = 8)
+               fig.path = "figure/", fig.width = 8, fig.height = 5)
 library(httr)
 library(tidyverse)
 library(ggmap)
@@ -68,11 +68,11 @@ It hasn't been the best summer for Spurs fans. A third round sweep, losing key t
 
 But that's life. 
 
-Pau Gasol re-upped with the team for 3 years, and LaMarcus Aldridge is still a Spur, for now. Last year I predicted how that front court might fare over the season. I'll be evaluating that, as well as examining how the team performed in general, as it relates to scoring. 
+Pau Gasol re-upped with the team for 3 years, and LaMarcus Aldridge is still a Spur, for now. [Last year I predicted how that front court might fare over the season](https://www.joewillage.com/blog/2016/8/8/replacing-tim-duncan-offensively). I'll be evaluating that, as well as examining how the team performed in general, as it relates to scoring. 
 
 ###PLAYERS###
 
-Allow me philosophize for a moment. When thinking about the future, we typically tap into a recency bias. How a team will perform in the upcoming season equals how they performed the previous season plus or minus offseason transactions. But it's not that simple. Players' performance isn't a straight line from the end of one season to the start of the next. It's not even a straight line within in a single season; players have a career game followed by an abysmal one, in any sport. Those microtrends are part of the entropy of sports, and a large part of what makes it fun to be a fan. But it's also a small slice of a larger picture - one that encapsulates a player's entire career, or a franchise's history. It's not different than the stock market. Looking at a symbol over the last month generally shows wild fluctuations. But zooming out to the last 5 years, the line becomes smoother and the trends surface. 
+Allow me philosophize for a moment. When thinking about the future, we typically tap into a recency bias. How a team will perform in the upcoming season equals how they performed the previous season plus or minus offseason transactions. But it's not that simple. Players' performance isn't a straight line from the end of one season to the start of the next. It's not even a straight line within a single season; players have a career game followed by an abysmal one, in any sport. Those microtrends are part of the entropy of sports, and a large part of what makes it fun to be a fan. But it's also a small slice of a larger picture - one that encapsulates a player's entire career, or a franchise's history. It's not different than the stock market. Looking at a symbol over the last month generally shows wild fluctuations. But zooming out to the last 5 years, the line becomes smoother and the trends surface. 
 
 That's the grain of salt. 
 
@@ -106,9 +106,9 @@ ggplot() +
   )
 ```
 
-Taking into account his entire career, Aldridge isn't really moving the needle much on his effective FG% from one season to the next. He's got a 49% total eFG%. Gasol, on the other hand, has had some large swings over his longer career. His first 8 years were similar to Aldridge's, no huge fluctuations. His numbers had an upswing when he was traded to the Lakers in '08, then slowly dropped throughout his time there. He had another (smaller) upswing his first year on the Bulls, then dropped, and then another upswing his first year on the Spurs. Spurs fans will hope Pau can buck the trend and keep shooting at a high percentage. 
+Taking into account his entire career, Aldridge isn't really moving the needle much on his effective FG% from one season to the next. He's got a 49% total eFG%[^1]. Gasol, on the other hand, has had some large swings over his longer career. His first 8 years were similar to Aldridge's, no huge fluctuations. His numbers had an upswing when he was traded to the Lakers in '08, then slowly dropped throughout his time there. He had another (smaller) upswing his first year on the Bulls, then dropped, and then another upswing his first year on the Spurs. Spurs fans will hope Pau can buck the trend and keep shooting at a high percentage. 
 
-The Aldridge/Gasol front court had mixed results relative to their previous individual seasons. As seen in the graph, Aldridge's numbers dropped across the board, while Gasol's mostly improved. 
+The Aldridge/Gasol front court had mixed results relative to their previous individual seasons. As seen in the graph[^2], Aldridge's numbers dropped across the board, while Gasol's mostly improved. 
 
 ```{r summarize-zones}
 summarizeDistance <- function(player) {
@@ -200,7 +200,7 @@ ggplot() +
     panel.grid.minor = element_blank(),
     panel.background = element_rect(color = "black", fill = "white"),
     panel.grid.major.x = element_line(color = "grey80"),
-    legend.position = c(0.9, 0.1)
+    legend.position = c(0.9, 0.15)
   ) +
   scale_y_continuous(expand = c(0, 0), limits = c(0, 0.8))
 ```
@@ -243,7 +243,7 @@ ggplot(spurs_wide, aes(OWS.2017, OWS.2016, X)) +
 
 Mills and Leonard are the only ones who showed noticeable improvment from 2016 to 2017. Everyone else showed similar or worse performance (looking at you, LaMarcus). 
 
-**Bonus content**: Their defense also down, as they went from allowing 92.9 PPG to allowing 98.1. 
+**Bonus content**: The Spurs defense was also down, as they went from allowing 92.9 PPG to allowing 98.1. 
 Though they were still the top defensive rated team. 
 
 
@@ -267,7 +267,7 @@ ggplot(spurs_wide, aes(DWS.2017, DWS.2016, X)) +
 ```
 
 ###LEAGUE###
-Let's see how the team's scoring fared against the rest of the league, by location. All areas here are relative to the leauge average. So a blue hexagon representing 80% suggests that the Spurs shot 80% better than the league, for instance 90% vs 10%. That's an extreme case, and I don't want to focus on individual hexagons, which represent a very small, specific location on the court. Instead, study the trends by area - large swaths of similar percentages. 
+Let's see how the team's scoring fared against the rest of the league. All areas here are relative to the leauge average. So a blue hexagon representing 80% suggests that the Spurs shot 80% better than the league, for instance 90% vs 10%[^3]. That's an extreme case, and I don't want to focus on individual hexagons, which represent a very small, specific location on the court. Instead, study the trends by area - large swaths of similar percentages. 
 
 
 ```{r prep-location}
@@ -293,7 +293,7 @@ combinedCoordSummary <- spursCoordSummary %>%
   mutate(relativePct = pct.spurs - pct.league)
 ```  
 
-```{r relative-shot-location}
+```{r relative-shot-location, fig.height = 8, fig.width = 8}
 ggplot(combinedCoordSummary, aes(x = LOC_X * -1, y = LOC_Y * -1, z = relativePct)) + 
   inset_raster(readPNG("../nba-halfcourt.png"), xmin = -250, xmax = 250, ymin = -420, ymax = 50) +
   lims(x = c(-250, 250), y = c(-420, 50)) +
@@ -316,7 +316,7 @@ ggplot(combinedCoordSummary, aes(x = LOC_X * -1, y = LOC_Y * -1, z = relativePct
     # todo text label: overall relative to league
   stat_summary_hex(binwidth = 20, alpha=0.95) +
   scale_fill_gradient2(low = "red", mid = "white", high = "blue", breaks = c(-1, 0, 1), 
-                      labels = c("-100%", "0%", "100%"))
+                      labels = c("-100%", "0%", "100%")) 
 ```
 
 ```{r}
@@ -326,15 +326,28 @@ leagueShotSummary <- summarizeDistance(league)
 relativeShotSummary <- mapply(function(x, y)  x - y,
        spursShotSummary,
        leagueShotSummary)
+
+spursRelativePaint <- ((spursShotSummary['player_makes_RA'][[1]] + spursShotSummary['player_makes_non_RA'][[1]])/(spursShotSummary['player_shots_RA'][[1]] + spursShotSummary['player_shots_non_RA'][[1]]) - 
+  (leagueShotSummary['player_makes_RA'][[1]] + leagueShotSummary['player_makes_non_RA'][[1]])/(leagueShotSummary['player_shots_RA'][[1]] + leagueShotSummary['player_shots_non_RA'][[1]]))*100
+
 ```
 
 
-Relative to the rest of the league, the Spurs underperformed scoring in the paint. 
+Relative to the rest of the league, the Spurs underperformed scoring in the paint (`r round(spursRelativePaint, 1)`%). 
 They got better the further out they shot, beating the league by `r round((relativeShotSummary[grepl("pct", names(relativeShotSummary))]*100)['player_pct_16_24'], 1)`% from 16-24 ft 🙄, 
 and `r round((relativeShotSummary[grepl("pct", names(relativeShotSummary))]*100)['player_pct_24_plus'], 1)`% from 3.
 
 And so went the regular the season. Into the playoffs the Spurs kept scoring at around the same rate.
 That worked fine against their first two opponents, who SA held to `r round(sum(82, 82, 105, 110, 103, 96)/6, 1)`
-and `r round(sum(126, 96, 92, 125, 107, 75)/6, 1)` PPG. But it won't cut it if their defense collapses,
+and `r round(sum(126, 96, 92, 125, 107, 75)/6, 1)` PPG. But it didn't cut it when their defense collapsed,
 as every team's does, when they play the Warriors.
+
+###FUTURE###
+The coming season should be an interesting one for the Spurs. Young players like Bryn Forbes and Dejounte Murray have showed a lot of upside; no one's quite sure how Rudy Gay's signing will effect minutes and positions; and there's still some hope that the team can land Kyrie. But Golden State hasn't gotten worse, and the division rival Rockets added Chris Paul. At the end of the day, the Spurs need to figure out a way to *scoar moar*. 
+
+[^1]: All eFG, win share, and team stats via basketball-reference.com. https://www.basketball-reference.com
+
+[^2]: All shot location data via NBA Shot Chart API. http://stats.nba.com/stats/shotchartdetail
+
+[^3]: Differences in density are not represented in this graph. One hex might represent 400 shots, and the one next to it might represent 40. 
 
