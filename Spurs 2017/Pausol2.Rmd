@@ -92,8 +92,8 @@ ggplot() +
   geom_line(aes(x=substr(Season, 1, 4), y=eFG.*100, color=Player, group=Player)) +
   geom_point(aes(x=substr(Season, 1, 4), y=eFG.*100, color=Player)) +
   scale_y_continuous(limits=c(45, 60.01), expand=c(0,0)) + 
-  labs(y="Effective FG%", x=NULL,
-       title="Player Career eFG%") +
+  labs(y="eFG%", x=NULL,
+       title="Player Career Effective FG%") +
   theme(
     # panel.margin = unit(0, "lines"), 
     # panel.grid.minor = element_blank(),
@@ -185,10 +185,10 @@ avg[((nrow(avg)/2)+1):nrow(avg),]$season <- 2015
 ```{r year-over-year}
 ggplot() + 
   geom_bar(data = avg[avg$season == 2015,],
-           aes(x = metric, y = pct, group = Player, fill=Player), 
+           aes(x = metric, y = pct*100, group = Player, fill=Player), 
            stat = "identity", width = 0.5, alpha=.2, color="grey80", position = "dodge") +
   geom_bar(data = avg[avg$season == 2016,],
-           aes(x = metric, y = pct, fill = Player), stat = "identity", width = 0.4,
+           aes(x = metric, y = pct*100, fill = Player), stat = "identity", width = 0.4,
            color="black", position = "dodge") +
   coord_flip() +
   guides(fill = guide_legend(reverse = TRUE), color = guide_legend(reverse = TRUE)) +
@@ -202,7 +202,7 @@ ggplot() +
     panel.grid.major.x = element_line(color = "grey80"),
     legend.position = c(0.9, 0.15)
   ) +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 0.8))
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 80))
 ```
 
 

@@ -81,4 +81,3 @@ The coming season should be an interesting one for the Spurs. Young players like
 
 [^3]: Differences in density are not represented in this graph. One hex might represent 400 shots, and the one next to it might represent 40. 
 
-BRE
