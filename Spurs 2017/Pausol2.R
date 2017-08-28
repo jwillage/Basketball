@@ -186,19 +186,33 @@ As seen in the graph, Aldridge's numbers dropped across the board, while Gasol's
 
 efg.aldridge <- read.csv("dat/aldridge_career.csv")
 efg.aldridge <- efg.aldridge[grepl("\\d{4}", efg.aldridge$Season), ]
+efg.aldridge$Player <- "Aldridge"
 plot(efg.aldridge$eFG.)
 
 efg.gasol <- read.csv("dat/gasol_career.csv")
 efg.gasol <- efg.gasol[grepl("\\d{4}", efg.gasol$Season), ]
-efg.gasol <- efg.gasol[-c(8,9),]
+efg.gasol <- efg.gasol[-c(8,9),] # remove years with multiple points
+efg.gasol$Player <- "Gasol"
 plot(efg.gasol$eFG.)
 
+rbind(efg.gasol, efg.aldridge) %>%
 ggplot() +
-  geom_point(aes(x=substr(efg.gasol$Season, 1, 4), y=efg.gasol$eFG.), color="#F8766D", size=3) + 
-  geom_point(aes(x=substr(efg.aldridge$Season, 1, 4), y=efg.aldridge$eFG.), color="#00BFC4", size=3) +
-  geom_line(aes(x=substr(efg.gasol$Season, 1, 4), y=efg.gasol$eFG., group=1), color="#F8766D") + 
-  geom_line(aes(x=substr(efg.aldridge$Season, 1, 4), y=efg.aldridge$eFG., group=1), color="#00BFC4")
-
+  geom_line(aes(x=substr(Season, 1, 4), y=eFG.*100, color=Player, group=Player)) +
+  geom_point(aes(x=substr(Season, 1, 4), y=eFG.*100, color=Player)) +
+  scale_y_continuous(limits=c(45, 60.01), expand=c(0,0)) + 
+  labs(y="Effective FG%", x=NULL,
+       title="Player Career eFG%") +
+  theme(
+    # panel.margin = unit(0, "lines"), 
+    # panel.grid.minor = element_blank(),
+    # panel.background = element_rect(color = "black", fill = "white"),
+    # panel.grid.major.x = element_line(color = "grey80"),
+    # panel.grid.major.y = element_line(color = "grey80"),
+    legend.position = c(0.9, 0.85),
+    legend.background = element_rect(fill="transparent"),
+    legend.key = element_rect(fill="white")
+  )
+  
 Let's see how the team fared against the rest of the league'
 
 game$xy <- paste(game$LOC_X, game$LOC_Y)
@@ -254,6 +268,9 @@ relativeShotSummary <- mapply(function(x, y)  x - y,
        leagueShotSummary)
 
 relativeShotSummary[grepl("pct", names(relativeShotSummary))]*100
+
+((spursShotSummary['player_makes_RA'][[1]] + spursShotSummary['player_makes_non_RA'][[1]])/(spursShotSummary['player_shots_RA'][[1]] + spursShotSummary['player_shots_non_RA'][[1]]) - 
+  (leagueShotSummary['player_makes_RA'][[1]] + leagueShotSummary['player_makes_non_RA'][[1]])/(leagueShotSummary['player_shots_RA'][[1]] + leagueShotSummary['player_shots_non_RA'][[1]]))*100
 
 Relative to the rest of the league, the Spurs overall underperformed scoring in the paint. 
 They got better the further out they shot, beating the league by 3.3% from 16-24 ft (eye roll), 
